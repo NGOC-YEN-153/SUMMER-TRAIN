@@ -1,0 +1,31 @@
+#include <bits/stdc++.h>
+using namespace std;
+struct combo{
+    int L , Q , D;
+};
+int main(){
+    ios_base::sync_with_stdio(false);
+    cin.tie(NULL); cout.tie(NULL);
+    int n , k;
+    cin >> n >> k;
+    combo dp[n+5];
+    int changeL[n+5] , changeQ[n+5] , changeD[n+5];
+    int sizeD = 0 , sizeQ = 0 , sizeL = 0;
+    int iL = 0 , iQ = 0 , iD = 0 ;
+    dp[0].L = dp[0] . Q  = dp[0].D = -1;
+    int ans = 1e9;
+    for(int i = 1 ; i<= n; i++){
+        char x;
+        cin >> x;
+    	dp[i] = dp[i-1];
+    	if(x =='L')changeL[sizeL++] = i;
+    	else if(x == 'Q')changeQ[sizeQ++] = i;
+    	else changeD[sizeD++] = i;
+    	if(x == 'L' && sizeL >= k)dp[i].L = changeL[iL++];
+    	if(x == 'Q' && sizeQ >= k)dp[i].Q = changeQ[iQ++];
+    	if(x == 'D' && sizeD >= k)dp[i].D = changeD[iD++];
+    	if(dp[i].D != -1 && dp[dp[i].D].Q != -1 && dp[dp[dp[i].D].Q].L != -1)ans = min(ans ,i - dp[dp[dp[i].D].Q].L +1 - 3 * k );
+	}
+	if(ans == 1e9)cout<<-1;
+	else cout<<ans;
+}
