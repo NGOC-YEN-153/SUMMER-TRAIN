@@ -1,0 +1,78 @@
+#include <bits/stdc++.h>
+using namespace std;
+#define ll unsigned long long
+int n , k;
+ll dp[15][(1<<12)+1][16 * 16];
+int getbit(int k , int n){
+    return (n >>(k-1)) & 1;
+}
+void setbit(int k , int &n  ,int c){
+    if(c)n |= (1<<(k-1));
+    else n &= ~(1<<(k-1));
+}
+ bool check(int mask , int limit){
+	int cnt = 0;
+	if(getbit(1,mask))cnt = 1;
+	for(int i = 2 ; i<= n ; i++){
+		int status = getbit(i,mask);
+		if(status){
+			if(getbit(i-1 ,mask))return false;
+			cnt++;
+		}
+	}
+	return cnt == limit;
+}
+bool CHECK(int mask , int premask,int n){
+	if(n == 1){
+		int x = mask &1 ,  y= premask &1;
+		if(x && y)return false;
+		return true;
+	}
+	for(int i = 2 ; i<= n; i++){
+		int x = getbit(i,mask) , y = getbit(i-1,mask) , z = getbit(i,premask) , t = getbit(i-1,premask);
+		if(x && y)return false;
+		if(z && t)return false;
+		if(x && t)return false;
+		if(y && z)return false;
+		if(x && z)return false;
+		if(y && t)return false;
+	}
+	return true;
+}
+bool ft[(1<<12) + 1][(1<<12) +1];
+ ll back(int i ,int mask, int limit){
+    if(dp[i][mask][limit] != -1)return dp[i][mask][limit];
+    if(i == 1){
+    	if(check(mask , limit))return 1;
+    	else return 0;
+	}
+	ll ans = 0;
+	int cnt1 = __builtin_popcount(mask);
+	for(int premask = 0 ; premask < (1<<n) ; premask ++){
+		if(ft[mask][premask] && limit - cnt1 >= 0){
+			if(dp[i-1][premask][limit - cnt1] != -1)ans+=dp[i-1][premask][limit - cnt1];
+			else ans+=back(i-1,premask,limit-cnt1);
+		}
+	}
+	return dp[i][mask][limit]= ans;
+}
+void solve(){
+    cin >> n >> k;
+    for(int i = 1 ; i<= n ; i++){
+    	for(int mask = 0 ; mask < (1<<n) ; mask ++){
+    		for(int j = 0 ; j <= k ; j++)dp[i][mask][j] = -1;
+		}
+	}
+	for(int mask = 0 ; mask < (1<<n) ; mask ++){
+		for(int premask = 0 ; premask < (1<<n) ; premask++){
+			if(CHECK(mask,premask,n))ft[mask][premask] = true;
+			else ft[mask][premask] = false;
+		}
+	}
+	ll ans = 0;
+	for(int mask = 0 ; mask < (1<<n) ; mask ++)ans+=back(n,mask,k);
+	cout<<ans<<endl;
+}
+int main(){
+   solve();
+}
