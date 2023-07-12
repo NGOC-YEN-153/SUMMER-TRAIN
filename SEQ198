@@ -1,0 +1,56 @@
+#include <bits/stdc++.h>
+using namespace std;
+#define ll long long
+int n;
+pair<int,int> a[2015];
+int dp[2015][1<<10];
+int getbit(int k , int n){return (n >> (k-1)) & 1;}
+bool check(int mask,int index){
+    for(int i = 2 ; i<= 10 ; i++){
+    	if(index-i + 1 < 1)return true;
+        int biti = getbit(i,mask);
+        if(!biti)continue;
+        if(a[index].first - a[index-i+1].first == 1 )return false;
+        else if( a[index].first - a[index-i+1].first == 8)return false;
+        else if(a[index].first - a[index-i+1].first == 9)return false;
+    }
+    return true;
+}
+int back(int i,int mask){
+    if(dp[i][mask] != -1)return dp[i][mask] ;
+    int premask1 = (mask>>1) , premask2 = (mask>>1) + (1<<9);
+    int x , y;
+    if(dp[i-1][premask1] != -1)x = dp[i-1][premask1];
+    else x = back(i-1 , premask1);
+    if(dp[i-1][premask2] != -1)y = dp[i-1][premask2];
+    else y = back(i-1 , premask2);
+    if((mask & 1 ) == 0)return dp[i][mask] = max(x , y);
+    if(check(mask,i))return dp[i][mask] = a[i].second + max(x ,y);
+    return dp[i][mask] = 0;
+}
+void solve(){
+    cin >> n;
+    map<int,int>mp;
+    for(int i= 1 ; i<= n; i++){
+        int x;
+        cin >> x;
+        mp[x]++;
+    }
+    int m = n;
+    n = mp.size();
+    int id = 1;
+    for(auto x : mp)a[id].first = x.first , a[id].second = x.second , id++;
+    int ans = 0 ;
+    for(int i = 1 ; i<= n ; i++){
+		for(int mask = 0 ; mask < (1<<10) ; mask ++)dp[i][mask] = -1;
+	}
+	for(int mask = 0 ; mask <(1<<10) ; mask++){
+		if(mask&1)dp[1][mask] = a[1].second;
+		else dp[1][mask] = 0;
+	}
+    for(int mask = 0 ; mask < (1<<10) ; mask ++)ans = max(ans , back(n,mask));
+    cout<<m - ans<<endl;
+}
+int main(){
+   solve();
+}
