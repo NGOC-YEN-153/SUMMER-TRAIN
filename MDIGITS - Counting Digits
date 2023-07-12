@@ -1,0 +1,79 @@
+#include <bits/stdc++.h>
+using namespace std;
+#define ll long long
+vector<int> A , B;
+ll dp[25][11] , DP[25][11];
+void init(int a , int b){
+    --a;
+    A.push_back(0);
+    B.push_back(0);
+    if(!a)A.push_back(0);
+    if(!b)B.push_back(0);
+    while(a)A.push_back(a%10) , a/=10;
+    while(b)B.push_back(b%10) , b/=10;
+    reverse(A.begin()+1 , A.end());
+    reverse(B.begin()+1 , B.end());
+    for(int i = 0 ; i<=9 ; i++)dp[1][i] = 1;
+    dp[1][0] = 0;
+    for(int  i = 2 ; i<= 9 ; i++ ){
+        for(int digit = 0 ; digit <= 9 ; digit++)dp[i][digit] = 0;
+        for(int digit = 0 ; digit <= 9 ; digit ++ ){
+            for(int j = 0 ; j<= 9 ; j++)dp[i][j]+=dp[i-1][j] ;
+            dp[i][digit]+= 9 * (ll)pow(10,i-2);
+        }
+    }
+    dp[1][0] = 1;
+    //
+    for(int i  = 0 ; i<= 9 ; i++)DP[1][i] = 1;
+    for(int  i = 2 ; i<= 9 ; i++ ){
+        for(int digit = 0 ; digit <= 9 ; digit++)DP[i][digit] = 0;
+        for(int digit = 0 ; digit <= 9 ; digit ++ ){
+            for(int j = 0 ; j<= 9 ; j++)DP[i][j]+=DP[i-1][j] ;
+            DP[i][digit]+=  (ll)pow(10,i-1);
+        }
+    }
+}
+vector<ll> back(int i, vector<int> a, int n ){
+    vector<ll> res;
+    for(int i=0 ; i<= 9 ; i++)res.push_back(0);
+    int nums = n - i ;
+    if(i == n){
+        for(int j = 0 ; j<= a[i] ; j++)res[j]++;
+        return res;
+    }
+    else if(i == 1){
+        for(int j = 1 ; j<= nums ; j++){
+            for(int digit = 0 ; digit <=9 ; digit++)res[digit]+=dp[j][digit];
+        }
+        for(int j = 1 ; j< a[i] ; j++){
+            for(int k = 0 ; k<=9 ; k++)res[k]+=DP[nums][k];
+            res[j]+=(ll)pow(10,nums);
+        }
+    }
+    else {
+        for(int j = 0 ; j< a[i] ; j++){
+        for(int k = 0 ; k<=9 ; k++)res[k]+=DP[nums][k];
+        res[j]+=(ll)pow(10,nums);
+    }
+}
+    vector<ll> x = back(i+1 , a , n);
+    for(int j = 0 ;  j <=9 ; j++)res[j]+=x[j];
+    ll cnt = 0 ;
+    for(int j = i+1 ; j<= n; j++)cnt = cnt * 10 + a[j];
+    res[a[i]]+=cnt+1;
+    return res;
+}
+int main(){
+    while(1){
+        ll a, b;
+        cin >> a >> b;
+        if(!a && !b)return 0;
+        A.clear() ; B.clear();
+        if(a > b)swap(a,b);
+        init(a,b);
+        int n = A.size() - 1 , m = B.size() - 1;
+        vector<ll> v1 = back(1,A,n) , v2 = back(1,B,m);
+        for(int i = 0 ; i<= 9 ; i++)cout<<v2[i] - v1[i]<<" ";
+        cout<<endl;
+    }
+}
