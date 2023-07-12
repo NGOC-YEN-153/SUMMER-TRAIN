@@ -1,0 +1,48 @@
+#include <bits/stdc++.h>
+using namespace std;
+#define ll long long
+int n  , m;
+ll mod = 1e9 + 7;
+ll dp[(1<<20) + 5][25];
+int ke[25][25];
+int getbit(int k , int n){
+    return (n >>(k-1)) & 1;
+}
+void setbit(int k , int &n  ,int c){
+    if(c)n |= (1<<(k-1));
+    else n &= ~(1<<(k-1));
+}
+inline ll back(int mask,int finish_city){
+    if(dp[mask][finish_city] != -1)return dp[mask][finish_city];
+    int bit1 = getbit(1,mask);
+    if(bit1 == 0)return 0;
+    if(__builtin_popcount(mask) == 1)return 1;
+    ll ans = 0;
+    int tmp_mask = mask;
+    setbit(finish_city ,tmp_mask , 0);
+    for(int i = 1 ; i<= n ;i++){
+        if(getbit(i  , tmp_mask) && ke[i][finish_city]){
+            //ans+=dp[tmp_mask][i];
+            if(dp[tmp_mask][i] != -1)ans+= dp[tmp_mask][i] * ke[i][finish_city];
+            else ans += back(tmp_mask , i) * ke[i][finish_city];
+            ans%=mod;
+        }
+    }
+    return dp[mask][finish_city] = ans;
+}
+void solve(){
+    cin >> n >> m;
+    memset(ke , 0 ,sizeof(ke));
+    while(m--){
+        int x , y;
+        cin >> x >> y;
+        ke[x][y]++;
+    }
+    for(int i =1; i < (1<<n) ; i++){
+        for(int j = 1 ; j <= n ; j++)dp[i][j] = -1;
+    }
+    cout<<back((1<<n) - 1 , n)<<endl;
+}
+int main(){
+   solve();
+}
