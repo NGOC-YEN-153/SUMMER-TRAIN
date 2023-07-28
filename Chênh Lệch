@@ -1,0 +1,33 @@
+#include <bits/stdc++.h>
+using namespace std;
+#define ll  long long
+void solve(){
+    int n , k;
+    cin >> n >> k;
+    ll a[n+1][n+1];
+    for(int i = 1 ; i<= n; i++){
+    	for(int j = 1 ; j<= n ;j ++)cin >>a[i][j];
+	}
+	ll dp[n+5][n+5] ,DP[n+5][n+5];
+	for(int i = 1 ; i<= n ; i++){
+		dp[i][0] = 0;
+		for(int j = 1 ; j<= n ; j++)dp[i][j] = dp[i][j-1] + a[i][j];
+	}
+	for(int j = 1 ; j<= n; j++){
+		DP[i][j] = 0 ;
+		for(int i = 1 ; i<= n ; i++)DP[j][i] = DP[j][i-1] + a[i][j];
+	}
+	ll ans = 1e9;
+	for(int i = 1 ; i<= n ; i++){
+		for(int j = 1 ; j<= n ;j++){
+			ll sumup = 0 , sumdown = 0  ;
+			sumup+=DP[j+k-1][i+k-2] - DP[j+k-2][i-1];
+			sumdown+=dp[i+k-1][j+k-2] - dp[i+k-1][j-1];
+			ans = min(ans ,abs(sumup - sumdown));
+		}
+	}
+	cout<<ans<<endl;
+}
+int main() {
+    solve();
+}
