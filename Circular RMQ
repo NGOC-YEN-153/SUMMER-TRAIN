@@ -1,0 +1,76 @@
+#include <bits/stdc++.h>
+#define ll long long
+using namespace std;
+#define giua t[u]
+#define trai t[2*u]
+#define phai t[2*u+1]
+const int N= 300000 ;
+ll a[N] , lazy[N * 4 + 5] , t[N * 4 + 5];
+void build(int u , int l , int r){
+    if(l == r)giua = a[l];
+    else {
+        int m = ( l + r) / 2;
+        build(2*u,l,m);build(2*u+1,m+1,r);
+        giua = min(trai,phai);
+    }
+    lazy[u] = 0;
+}
+void update(int u , int tl , int tr , int l , int r,ll value){// vừa tiêu diệt lazy(khi gọi với value = 0 ) , vừa có thể gọi về mảnh đơn vị  
+    lazy[2*u]+=lazy[u];
+    lazy[2*u+1]+=lazy[u];
+    giua+=lazy[u];
+    lazy[u] = 0 ;
+    if(l == tl && r == tr){
+        giua+= value;
+        lazy[2*u]+=value;
+        lazy[2*u+1]+=value;
+    }
+    else{
+        int m = (tl + tr) /2;
+        if( r <= m)update(2*u,tl,m,l,r,value),update(2*u+1,m+1,tr,m+1,tr,0ll);
+        else if( l > m)update(2*u,tl,m,tl,m,0ll) ,update(2*u+1,m+1,tr,l,r,value);
+        else update(2*u,tl,m,l,m,value) , update(2*u+1,m+1,tr,m+1,r,value);
+        giua = min(trai,phai);
+    }
+}
+ll qr(int u , int tl , int tr , int l , int r){
+    if(lazy[u])update(u,tl,tr,tl,tr,0ll);
+    if( l == tl && r == tr)return giua;
+    int m = (tl + tr) / 2;
+    if( r <= m)return qr(2*u,tl,m,l,r);
+    else if( l > m)return qr(2*u + 1 , m+1 , tr,l,r);
+    return min(qr(2*u,tl,m,l,m), qr(2*u+1,m+1,tr,m+1,r));
+}
+void solve(){
+    int n ; cin >> n;
+    for(int i = 1 ; i<= n; i++)cin >> a[i];
+    int q;
+    cin >> q;
+    cin.ignore();
+    build(1,1,n);
+    while(q--){
+        string s; getline(cin,s);
+        stringstream ss(s);
+        vector<int> v;
+        string tmp;
+        while(ss >> tmp){
+            v.push_back(stoi(tmp));
+        }
+        if(v.size() == 2){
+            int l = v[0] + 1 , r = v[1] + 1;
+            if(l <= r)cout<<qr(1,1,n,l,r);
+            else cout<<min(qr(1,1,n,l,n) , qr(1,1,n,1,r));
+            cout<<endl;
+        }
+        else {
+            int l = v[0] + 1 , r = v[1] + 1,value = v[2];
+            if( l <= r)update(1,1,n,l,r,1ll*value);
+            else update(1,1,n,l,n,1ll*value) , update(1,1,n,1,r,1ll*value);
+        }
+    }
+}
+int main(){
+    ios_base::sync_with_stdio(false);
+    cin.tie(NULL); cout.tie(NULL);
+    solve();
+}
