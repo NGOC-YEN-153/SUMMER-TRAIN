@@ -1,0 +1,73 @@
+#include <bits/stdc++.h>
+#define ii pair<int,int>
+using namespace std;
+struct combo{
+	int u , min,max;
+};
+int n ;
+vector<ii>adj[100005];
+int value_unique[100005];
+int par[100005][18] ,nho[100005][18] , lon[100005][18] , height[100005];
+bool used[100005];
+void dfs(int u,int cao){
+    used[u] = true;
+    height[u]  = cao;
+    for(auto x :adj[u]){
+        if(!used[x.first])dfs(x.first,cao+1) , par[x.first][0] = u,value_unique[x.first] = nho[x.first][0] = lon[x.first][0] = x.second ;
+    }
+}
+void build(){
+    dfs(1,0);
+    value_unique[1] = 0 ;
+    for(int i = 0 ; i<=17 ; i++)par[1][i] = 1 , nho[1][i] = 1e9 , lon[1][i] = -1e9;
+    for(int j = 1 ; j <= 17 ; j++){
+        for(int i = 1 ; i<= n ; i++){
+            nho[i][j] = min(nho[i][j-1] , nho[par[i][j-1]][j-1] );
+            lon[i][j] = max(lon[i][j-1] , lon[par[i][j-1]][j-1] );
+            par[i][j] = par[par[i][j-1]][j-1];
+        }
+    }
+}
+combo find(int k , int u){
+	int base = 0  , minn = 1e9 , maxx = -1e9;
+    while(k){
+    	if(k &1 ) minn = min(minn  , nho[u][base]) , maxx = max(maxx  , lon[u][base]) , u = par[u][base] ;
+    	k>>=1 ; base++;
+    }
+    return combo{u , minn , maxx};    
+}
+combo lca(int x , int y){
+    if(height[x] > height[y])swap(x,y);
+    combo tmp;
+    if(height[x] != height[y])tmp = find(height[y]-height[x] , y) , y = tmp.u; // convert to same height
+    else tmp = {x , 1000000000, -1000000000 };
+    if(x == y)return tmp;
+    for(int i = 17 ; i >= 0  ; i--){ // tham lam moi dung , nguoc lai sai
+        if(par[x][i] != par[y][i]) tmp.min= min({tmp.min , nho[x][i] ,nho[y][i]}) , tmp.max = max({tmp.max , lon[x][i],lon[y][i]}) , x = par[x][i] , y = par[y][i];
+    }
+    return combo{par[x][0] , min({tmp.min , value_unique[x] , value_unique[y]}) ,max({tmp.max , value_unique[x] , value_unique[y]})};
+}
+void solve() {
+    cin >> n;
+    memset(used,false,sizeof(used));
+    for(int i = 1; i<= n-1 ; i++){
+            int a , b , c;cin >> a >> b >> c;
+            adj[a].push_back({b,c});
+            adj[b].push_back({a,c});
+    }
+    build();
+    int q ; cin >> q;
+    while(q--){
+        int x , y ; cin >> x >> y;
+        combo ans = lca(x,y);
+        cout<<ans.min <<" " <<ans.max <<endl;
+    }
+}
+
+int main() {
+    ios_base::sync_with_stdio(false);
+    cin.tie(NULL); cout.tie(NULL);
+    int t = 1;
+//    cin >> t;
+    for(int i = 1;  i<= t ; i++)solve();
+}
