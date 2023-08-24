@@ -1,0 +1,41 @@
+#include <bits/stdc++.h>
+#define ii pair<int,bool>
+using namespace std;
+vector<int> adj[2*100005];
+bool used[2*100005];
+int n ;
+void inp(){
+	cin >> n;
+	for(int i =1 ; i< n ; i++){
+		int x  ,y ; cin >> x >> y;
+		adj[x].push_back(y);
+		adj[y].push_back(x);
+	}
+	memset(used,false,sizeof(used));
+}
+ii back(int u){
+	used[u] = true;
+	bool flag = false;
+	bool my_color = false;
+	int ans = 0 ;
+	for(auto x : adj[u])if(!used[x]){
+		flag = true;
+		ii value = back(x);
+		int cnt = value.first , color = value.second;
+		ans+=cnt;
+		if(!my_color and !color)my_color = true , ans++;
+	}
+	if(!flag)return {0,false};
+	return {ans , my_color};
+}
+void solve(){
+	inp();
+	cout<<back(1).first<<endl;
+}
+int main() {
+    ios_base::sync_with_stdio(false);
+    cin.tie(NULL); cout.tie(NULL);
+    int t = 1;
+//    cin >> t;
+    for(int i = 1;  i<= t ; i++)solve();
+}
