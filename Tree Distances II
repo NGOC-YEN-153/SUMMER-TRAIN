@@ -1,0 +1,57 @@
+#include <bits/stdc++.h>
+using namespace std;
+#define ll long long
+#define ii pair<int,int>
+using namespace std;
+bool used[2 * 100005];
+vector<ll> adj[2*100005];
+ll dpduoi[2 * 100005] , dp[2 * 100005] , dosau[2 * 100005];
+ll n ;
+ll timdosau(ll u){
+	used[u] = true;
+	ll ans = 0 ;
+	for(auto x  : adj[u])if(!used[x]){
+		ans += timdosau(x);
+	}
+	return dosau[u] = 1 +  ans ;
+}
+ll tongduoi(ll u ){
+	used[u] = true;
+	ll ans = 0 ;
+	for(auto x : adj[u])if(!used[x]){
+		ans += tongduoi(x) + dosau[x];
+	}
+	return dpduoi[u] = ans;
+}
+void back(ll u , ll par ){
+	used[u] = true;
+	dp[u] = dpduoi[u] + dp[par] + n - dosau[u]  - dpduoi[u] - dosau[u] ;
+	for(auto x : adj[u])if(!used[x]){
+		back(x , u);
+	}
+}
+void solve(){
+	cin >> n ;
+	for(ll i = 1 ; i<= n - 1 ; i++){
+		ll x , y ; cin >> x >> y;
+		adj[x].push_back(y);
+		adj[y].push_back(x);
+	}
+	//
+	memset(used,false,sizeof(used));
+	timdosau(1);
+	memset(used,false,sizeof(used));
+	tongduoi(1);
+	memset(used,false,sizeof(used));
+	dp[1] = dpduoi[1];
+	used[1] = true;
+	for(auto x : adj[1])back(x,1);
+	for(ll i = 1 ; i<= n; i++)cout<<dp[i]<<" ";
+}
+int main() {
+    ios_base::sync_with_stdio(false);
+    cin.tie(NULL); cout.tie(NULL);
+    int t = 1;
+//    cin >> t;
+    for(int i = 1;  i<= t ; i++)solve();
+}
