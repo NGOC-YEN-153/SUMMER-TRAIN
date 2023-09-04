@@ -1,0 +1,92 @@
+#include <bits/stdc++.h>
+using namespace std;
+#define ll long long
+#define ii pair<ll,ll>
+using namespace std;
+const ll maxN = 2 * 100005;
+bool used[maxN] ,la[maxN];
+vector<ll> adj[maxN];
+ll n  ,m , dp[maxN][19] , ketqua[maxN] , hieu[maxN] ,dosau[maxN];
+void timdosau(ll u,ll cnt ){
+	used[u] = true;
+	ll child = 0 ;
+	dosau[u] = cnt;
+	for(auto x  : adj[u])if(!used[x]){
+		timdosau(x,cnt+1);
+		dp[x][0] = u;
+		child++;
+	}
+	if(child == 0)la[u] = true;
+}
+ll chathuk(ll x , ll k){
+	ll base = 0;
+	while(k){
+		if(k&1)x = dp[x][base] ;
+		base++ ; k>>=1;
+	}
+	return x;
+}
+ll lca(ll a , ll b){
+	if(dosau[a] > dosau[b])swap(a,b);
+	if(dosau[a] != dosau[b])b = chathuk(b,dosau[b] - dosau[a]);
+	if(a == b)return a;
+	for(ll i = 18 ; i >= 0 ; i--){
+		if(dp[a][i] != dp[b][i]) a = dp[a][i] , b  = dp[b][i];
+	}
+	return dp[a][0] ;
+}
+void recovery(ll u){
+	used[u] = true;
+	if(la[u])return;
+	ll sum  = 0;
+	for(auto x : adj[u])if(!used[x])recovery(x) , sum+=ketqua[x];
+	ketqua[u] = sum + hieu[u];
+}
+void solve1(ll a , ll b){
+	ii canh ;
+	if(dosau[a] > dosau[b])canh = {b , a};
+	else canh = { a , b};
+	a = canh.first ; b = canh.second;
+	hieu[dp[a][0]]--;
+	hieu[b]++;
+}
+void solve(){
+	cin >> n  >> m;
+	for(ll i = 1 ; i<= n-1 ; i++){
+		ll x ,y; cin >> x >>y;
+		adj[x].push_back(y);
+		adj[y].push_back(x);
+	}
+	adj[0].push_back(1);
+	adj[1].push_back(0);
+	//
+	memset(used,false,sizeof(used));
+	memset(la,false,sizeof(la));
+	memset(hieu , 0 ,sizeof(hieu));
+	for(int i = 1 ; i<= n ;i ++)ketqua[i] = 0;
+	timdosau(0,0);
+	for(ll j = 0 ; j <= 18 ; j++)dp[1][j] = 0;
+	for(ll j = 1 ; j<= 18 ; j++){
+		for(ll i = 1 ; i<= n; i++)dp[i][j] = dp[dp[i][j-1]][j-1];
+	}
+	while(m--){
+		ll a , b ; cin >> a >> b;
+		if(la[a])ketqua[a]++;
+		if(la[b])ketqua[b]++;
+		if(a==b && la[a])ketqua[a]--;
+		ll x = lca(a,b);
+		if(x == a || x == b)solve1(a,b);
+		else solve1(x,a) , solve1(chathuk(b,dosau[b] - dosau[x] - 1) ,b);
+	}
+	memset(used,false,sizeof(used));
+	used[0] = true;
+	recovery(1);
+	for(int i =1 ; i<= n ; i++)cout<<ketqua[i]<<" ";
+}
+int main() {
+    ios_base::sync_with_stdio(false);
+    cin.tie(NULL); cout.tie(NULL);
+    int t = 1;
+//    cin >> t;
+    for(int i = 1;  i<= t ; i++)solve();
+}
